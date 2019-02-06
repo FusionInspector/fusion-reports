@@ -2,13 +2,13 @@ from __future__ import print_function
 import os
 import json
 
-from igv_reports import data_uri
+from igv_reports import datauri
 
 QUOTES = {"'", '"'}
 SCRIPT_PATH = os.path.abspath(os.path.dirname(__file__))
 
 
-def create_fusion_report(template, table_json):
+def create_fusion_report(template, fusions):
 
     basedir = os.path.dirname(template)
     data_uris = {}
@@ -34,7 +34,7 @@ def create_fusion_report(template, table_json):
 
 
     #insert json for selection table
-    with open(table_json, "r") as f:
+    with open(fusions, "r") as f:
         j = json.loads(f.read())
         flattend_json = json.dumps(j)
 
@@ -60,7 +60,7 @@ def create_fusion_report(template, table_json):
             filename = line[start:i]
             output_lines.append(line[:start - 1] + 'data["' + filename + '"]' + line[i+1:])
             if os.path.exists(os.path.join(basedir, filename)):
-                data_uris[filename] = data_uri.file_to_data_uri(os.path.join(basedir, filename))
+                data_uris[filename] = datauri.file_to_data_uri(os.path.join(basedir, filename))
 
 
         else:
@@ -91,7 +91,7 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
     parser.add_argument("filename", help="the html file to be converted")
-    parser.add_argument("tableJson", help="json file encoding the selection table")
+    parser.add_argument("fusions", help="json file defining the fusions (fusion inspector output)")
     args = parser.parse_args()
 
-    create_fusion_report(args.filename, args.tableJson)
+    create_fusion_report(args.filename, args.fusions)
