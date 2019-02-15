@@ -1,1 +1,2 @@
-git+https://github.com/igvteam/igv-reports#egg=igv-reports
+requests
+igv-reports
