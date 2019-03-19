@@ -14,7 +14,7 @@ SCRIPT_PATH = os.path.abspath(os.path.dirname(__file__))
 
 def create_fusion_report(template, fusions, output_filename):
 
-    basedir = os.path.dirname(template)
+    basedir = os.path.dirname(fusions)
     data_uris = {}
 
     with open(template, "r") as f:
