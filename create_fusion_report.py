@@ -1,9 +1,9 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # encoding: utf-8
 
 
 from __future__ import print_function
-import os
+import os, sys
 import json
 
 from igv_reports import datauri
@@ -12,7 +12,7 @@ QUOTES = {"'", '"'}
 SCRIPT_PATH = os.path.abspath(os.path.dirname(__file__))
 
 
-def create_fusion_report(template, fusions):
+def create_fusion_report(template, fusions, output_filename):
 
     basedir = os.path.dirname(template)
     data_uris = {}
@@ -78,8 +78,7 @@ def create_fusion_report(template, fusions):
 
     new_html_data = report_header + report_data_uris + report_body
 
-    output_name = os.path.join(template[:-5] + '_report' + template[-5:])
-    with open(output_name, 'w') as f:
+    with open(output_filename, 'w') as f:
         f.writelines(new_html_data)
 
 
@@ -94,8 +93,12 @@ if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("filename", help="the html file to be converted")
-    parser.add_argument("fusions", help="json file defining the fusions (fusion inspector output)")
+    parser.add_argument("--html_template", help="the html file to be converted", required=True, type=str)
+    parser.add_argument("--fusions_json", help="json file defining the fusions (fusion inspector output)", required=True, type=str)
+    parser.add_argument("--html_output", help="filename for html output", required=True, type=str)
+    
     args = parser.parse_args()
-
-    create_fusion_report(args.filename, args.fusions)
+    
+    create_fusion_report(args.html_template, args.fusions_json, args.html_output)
+    
+    sys.exit(0)
