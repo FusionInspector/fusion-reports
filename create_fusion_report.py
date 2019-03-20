@@ -65,7 +65,9 @@ def create_fusion_report(template, fusions, output_filename):
             output_lines.append(line[:start - 1] + 'data["' + filename + '"]' + line[i+1:])
             if os.path.exists(os.path.join(basedir, filename)):
                 data_uris[filename] = datauri.file_to_data_uri(os.path.join(basedir, filename))
-
+            else:
+                sys.stderr.write("Error - not locating file: {}\n".format(os.path.join(basedir, filename)))
+                
 
         else:
             output_lines.append(line)
