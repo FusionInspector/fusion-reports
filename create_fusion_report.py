@@ -17,10 +17,11 @@ def create_fusion_report(template, fusions, output_filename):
     basedir = os.path.dirname(fusions)
     data_uris = {}
 
+    ## read in template
     with open(template, "r") as f:
         data = f.readlines()
 
-
+    ## determine where in the html template that the igv code should be inserted.
     for i, line in enumerate(data):
         j = line.find('<!-- start igv report here -->')
         if j >= 0:
@@ -44,9 +45,8 @@ def create_fusion_report(template, fusions, output_filename):
 
     output_lines.append('var tableJson = ' + flattend_json)
 
-
     for line_index, line in enumerate(input_lines):
-
+        
         is_index = line.find('indexURL:') > 0
         if is_index:
             continue
