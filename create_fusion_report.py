@@ -1,15 +1,10 @@
 #!/usr/bin/env python3
 # encoding: utf-8
 
-
-from __future__ import print_function
-import os, sys
+import os, sys, re
 import json
 
 from igv_reports import datauri
-
-QUOTES = {"'", '"'}
-SCRIPT_PATH = os.path.abspath(os.path.dirname(__file__))
 
 
 def create_fusion_report(template, fusions, output_filename):
@@ -35,42 +30,42 @@ def create_fusion_report(template, fusions, output_filename):
 
 
     input_lines = data[report_start:]
+
+
+
     output_lines = []
-
-
-    #insert json for selection table
+    #insert json for fusion selection table
     with open(fusions, "r") as f:
         j = json.loads(f.read())
         flattend_json = json.dumps(j)
 
     output_lines.append('var tableJson = ' + flattend_json)
 
+
+    ## make data uri's for each of the referenced input filenames in the html doc
     for line_index, line in enumerate(input_lines):
         
         is_index = line.find('indexURL:') > 0
         if is_index:
+            # ignore the index files
             continue
-
-        i = line.lower().find('url:')
-
-        if i >= 0:
-            i += 4
-            while line[i] not in QUOTES and i < len(line):
-                i += 1
-            i += 1
-            start = i
-            while line[i] not in QUOTES and i < len(line):
-                i += 1
-            filename = line[start:i]
-            output_lines.append(line[:start - 1] + 'data["' + filename + '"]' + line[i+1:])
+        
+        
+        m = re.search("url:\s*([\"\']([^\"\']+)[\"\'])", line, flags=re.IGNORECASE)
+        if (m):
+            core_match = m.group(1)
+            filename = m.group(2)
+            (line, count) = re.subn(core_match, "data[\"{}\"]".format(filename), line, count=1)
+            if count != 1:
+                raise(RuntimeError("couldnt perform replacement at: {}".format(line)))
+            
             if os.path.exists(os.path.join(basedir, filename)):
                 data_uris[filename] = datauri.file_to_data_uri(os.path.join(basedir, filename))
             else:
                 sys.stderr.write("Error - not locating file: {}\n".format(os.path.join(basedir, filename)))
                 
+        output_lines.append(line)
 
-        else:
-            output_lines.append(line)
 
     report_header =  data[:report_start]
 
