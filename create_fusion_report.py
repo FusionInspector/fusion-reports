@@ -7,7 +7,7 @@ import json
 from igv_reports import datauri
 
 
-def create_fusion_report(template, fusions, output_filename):
+def create_fusion_report(template, fusions, output_filename, input_file_prefix):
 
     basedir = os.path.dirname(fusions)
     data_uris = {}
@@ -49,8 +49,9 @@ def create_fusion_report(template, fusions, output_filename):
         if is_index:
             # ignore the index files
             continue
-        
-        
+
+        line = re.sub("__PREFIX__", input_file_prefix, line)
+                
         m = re.search("url:\s*([\"\']([^\"\']+)[\"\'])", line, flags=re.IGNORECASE)
         if (m):
             core_match = m.group(1)
@@ -58,7 +59,8 @@ def create_fusion_report(template, fusions, output_filename):
             (line, count) = re.subn(core_match, "data[\"{}\"]".format(filename), line, count=1)
             if count != 1:
                 raise(RuntimeError("couldnt perform replacement at: {}".format(line)))
-            
+
+                        
             if os.path.exists(os.path.join(basedir, filename)):
                 data_uris[filename] = datauri.file_to_data_uri(os.path.join(basedir, filename))
             else:
@@ -93,9 +95,10 @@ if __name__ == "__main__":
     parser.add_argument("--html_template", help="the html file to be converted", required=True, type=str)
     parser.add_argument("--fusions_json", help="json file defining the fusions (fusion inspector output)", required=True, type=str)
     parser.add_argument("--html_output", help="filename for html output", required=True, type=str)
+    parser.add_argument("--input_file_prefix", help="prefix for input files", required=True, type=str)
     
     args = parser.parse_args()
     
-    create_fusion_report(args.html_template, args.fusions_json, args.html_output)
+    create_fusion_report(args.html_template, args.fusions_json, args.html_output, args.input_file_prefix)
     
     sys.exit(0)
